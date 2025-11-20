@@ -4,24 +4,31 @@ security:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        # users_in_memory: { memory: null }
-        in_memory:
-            memory:
-                users:
-                    admin:
-                        password: '$2y$13$tB3ccwao.h6gJjP211YN7e3tgUbeeOyhYF6P42d1a1hhQRv1heUdS'
-                        roles: ['ROLE_ADMIN']
-                    user:
-                        password: '$2y$13$fkdFQAScZtpSyVkYHF23jeKMEH3oyKtOS5CzEYfK0/i2TzLOnrH1q'
-                        roles: ['ROLE_USER']
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: username
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
             lazy: true
-            http_basic: ~
-            provider: in_memory
+            provider: app_user_provider
+            custom_authenticator: App\Security\UserAuthenticator
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
+                # by default, the feature is enabled by checking a checkbox in the
+                # login form, uncomment the following line to always enable it.
+                #always_remember_me: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
